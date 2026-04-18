@@ -54,11 +54,11 @@
  * background colour shared across all four sub-palettes.
  * ------------------------------------------------------------------ */
 const uint8_t palette_bg[16] = {
-    /* Sub-palette 0 — dark/sky (used for sky tiles) */
+    /* Sub-palette 0 — title / sky */
     0x0F,  /* universal BG = black          */
-    0x30,  /* white  — clouds / text        */
-    0x16,  /* red    — accent               */
-    0x11,  /* blue   — sky details          */
+    0x30,  /* white  — highlights / text    */
+    0x16,  /* red    — drop shadow          */
+    0x21,  /* bright blue — letter body     */
 
     /* Sub-palette 1 — greens (grass, trees) */
     0x0F,
@@ -153,4 +153,41 @@ void gfx_clear_nametable(void)
      */
     vram_adr(NAMETABLE_A + 32 * 30);
     vram_fill(0, 64);
+}
+
+/* ------------------------------------------------------------------
+ * gfx_draw_text()
+ * Write a null-terminated ASCII string to tile coordinates (x, y)
+ * in nametable A.  Assumes the CHR ROM maps ASCII values directly
+ * as tile indices (standard cc65 convention).
+ * Must be called while the PPU is off.
+ * ------------------------------------------------------------------ */
+void gfx_draw_text(unsigned char x, unsigned char y, const char *str)
+{
+    vram_adr(NTADR_A(x, y));
+    while (*str) {
+        vram_put(*str);
+        ++str;
+    }
+}
+
+/* ------------------------------------------------------------------
+ * gfx_draw_tile_rect()
+ * Draw a rectangular block of sequential tiles into the nametable.
+ * Tiles are numbered row-major starting from first_tile.
+ * Must be called while the PPU is off.
+ * ------------------------------------------------------------------ */
+void gfx_draw_tile_rect(unsigned char x, unsigned char y,
+                         unsigned char w, unsigned char h,
+                         unsigned char first_tile)
+{
+    unsigned char r, c, tile;
+    tile = first_tile;
+    for (r = 0; r < h; ++r) {
+        vram_adr(NTADR_A(x, y + r));
+        for (c = 0; c < w; ++c) {
+            vram_put(tile);
+            ++tile;
+        }
+    }
 }

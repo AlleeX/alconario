@@ -56,7 +56,13 @@ static void enter_title(void)
     gfx_clear_nametable();  /* wipe all background tiles to tile #0   */
     gfx_load_palettes();    /* upload colour palettes to the PPU       */
 
-    /* TODO: draw the title logo and "PRESS START" text into nametable */
+    /* Draw a vodka bottle image (4×7 tiles = 32×56 px, tiles $01-$1C) */
+    gfx_draw_tile_rect(14, 2, 4, 7, 0x01);
+
+    /* Draw the title logo (22×3 tiles, SMB-style white-on-blue + shadow) */
+    gfx_draw_tile_rect(5, 11, 22, 3, 0x80);
+    gfx_draw_text(10, 18, "PRESS START");  /* call to action           */
+    gfx_draw_text(8,  26, "(C) ALLEEX 2026"); /* copyright footer     */
 
     /*
      * ppu_on_all() re-enables both background AND sprite rendering.

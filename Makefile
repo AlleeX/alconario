@@ -28,28 +28,26 @@
 # =============================================================================
 
 # ---- Project identity -------------------------------------------------------
-PROJECT   := alconario        # output filename (without extension)
-TARGET    := nes              # cc65 target platform — tells the compiler/linker
-                              # which runtime library and calling conventions to use
-MAPPER    := nrom             # documentation only — the actual mapper is set
-                              # in cfg/nes.cfg (NROM = mapper 0, simplest)
+PROJECT   := alconario
+TARGET    := nes
+MAPPER    := nrom
 
 # ---- Toolchain binaries -----------------------------------------------------
-CC        := cc65             # C → 6502 assembly
-AS        := ca65             # 6502 assembly → object file
-LD        := ld65             # object files + libs → .nes ROM
+CC        := cc65
+AS        := ca65
+LD        := ld65
 
 # ---- Directory layout -------------------------------------------------------
-SRC_DIR   := src              # C source files  (*.c)
-ASM_DIR   := src/asm          # Assembly files  (*.s) — custom 6502 stubs
-INC_DIR   := include          # C header files  (*.h)
-LIB_DIR   := lib              # Vendored third-party libraries
-CFG_DIR   := cfg              # Linker configuration  (nes.cfg)
-ASSET_DIR := assets           # Game assets  (CHR, palettes, music, levels)
-BUILD_DIR := build            # All build outputs land here  (gitignored)
-OBJ_DIR   := $(BUILD_DIR)/obj # Intermediate .o and generated .s files
+SRC_DIR   := src
+ASM_DIR   := src/asm
+INC_DIR   := include
+LIB_DIR   := lib
+CFG_DIR   := cfg
+ASSET_DIR := assets
+BUILD_DIR := build
+OBJ_DIR   := $(BUILD_DIR)/obj
 
-NESLIB_DIR := $(LIB_DIR)/neslib  # Path to the cloned neslib repo
+NESLIB_DIR := $(LIB_DIR)/neslib
 
 # ---- Compiler flags  (cc65) -------------------------------------------------
 # -t $(TARGET)  : target = nes — selects nes.lib, correct startup code
@@ -111,10 +109,14 @@ EMU ?= fceux
 # BUILD TARGETS
 # =============================================================================
 
-.PHONY: all run clean dirs help
+.PHONY: all run clean dirs help gen
 
 # Default target — build the ROM.
 all: dirs $(OUTPUT)
+
+# Generate CHR tile data from the Python script.
+gen:
+	python3 tools/gen_chr.py
 
 # Create the output directories before anything else.
 dirs:
@@ -124,8 +126,8 @@ dirs:
 # $< = the .c prerequisite    $* = the stem (filename without extension)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@echo "  CC  $<"
-	@$(CC) $(CFLAGS) -o $(OBJ_DIR)/$*.s $<   # 1. compile to .s
-	@$(AS) $(ASFLAGS) -o $@ $(OBJ_DIR)/$*.s  # 2. assemble to .o
+	@$(CC) $(CFLAGS) -o $(OBJ_DIR)/$*.s $<
+	@$(AS) $(ASFLAGS) -o $@ $(OBJ_DIR)/$*.s
 
 # ---- Project assembly (src/asm/*.s) → object file ---------------------------
 $(OBJ_DIR)/%.o: $(ASM_DIR)/%.s
@@ -157,5 +159,6 @@ clean:
 help:
 	@echo "Targets:"
 	@echo "  make           Build $(OUTPUT)"
+	@echo "  make gen       Regenerate CHR tile data (requires Python 3)"
 	@echo "  make run       Build and run in \$$EMU (default: $(EMU))"
 	@echo "  make clean     Remove build artifacts"

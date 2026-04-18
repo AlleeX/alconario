@@ -36,4 +36,23 @@ void gfx_load_palettes(void);
  */
 void gfx_clear_nametable(void);
 
+/*
+ * gfx_draw_text() — write an ASCII string into the nametable.
+ * x, y are tile coordinates (0-31, 0-29).
+ * Assumes CHR ROM maps ASCII codes directly as tile indices.
+ * Must be called while the PPU is off.
+ */
+void gfx_draw_text(unsigned char x, unsigned char y, const char *str);
+
+/*
+ * gfx_draw_tile_rect() — blit a rectangular block of sequential tiles.
+ * x, y       : top-left tile coordinates in the nametable.
+ * w, h       : size in tiles.
+ * first_tile : index of the first tile; tiles are stored row-major.
+ * Must be called while the PPU is off.
+ */
+void gfx_draw_tile_rect(unsigned char x, unsigned char y,
+                         unsigned char w, unsigned char h,
+                         unsigned char first_tile);
+
 #endif /* GFX_H */

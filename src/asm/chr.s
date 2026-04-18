@@ -8,8 +8,4 @@
 
 .segment "CHARS"
 
-.ifdef HAS_CHR_FILE
-        .incbin "../assets/chr/tiles.chr"
-.else
-        .res 8192, $00
-.endif
+        .incbin "../../assets/chr/tiles.chr"

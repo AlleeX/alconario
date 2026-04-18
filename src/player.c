@@ -130,7 +130,7 @@ void player_update(void)
  * ------------------------------------------------------------------ */
 void player_draw(void)
 {
-    oam_spr(player.x, player.y, PLAYER_TILE, PLAYER_ATTR);
+    oam_spr(player.x, player.y, PLAYER_TILE, PLAYER_ATTR, 0);
 
     /*
      * For a 16×16 player made of 4 tiles you would call oam_spr() four
