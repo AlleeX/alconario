@@ -2,6 +2,8 @@
 
 > *"Every hero needs a friend."*
 
+![Title Screen](docs/assets/images/title.png)
+
 **Alconario** is a funny real 8-bit NES game starring **Alconario** — the best
 friend of Mario, a cheerful guy from a small Belarusian village deep in the
 countryside.
@@ -54,7 +56,7 @@ alconario/
 ├── src/asm/             # Hand-written 6502 assembly
 │   └── chr.s            # CHR-ROM bank embedding
 ├── tools/               # Helper scripts (asset conversion, packing)
-│   └── README.md
+│   └── gen_chr.py       # Generates tiles.chr (bottle art, font, title logo)
 ├── build/               # Build outputs (gitignored)
 ├── Makefile
 ├── .gitignore
@@ -112,12 +114,17 @@ To get header navigation and basic IntelliSense, create
 > understand all cc65-specific constructs — but "Go to Definition" and header
 > navigation will work fine.
 
-## �🚀 Build & run
+## 🚀 Build & run
 
 ```bash
+# Generate CHR tile data and build the ROM
+python3 tools/gen_chr.py && make clean && make
+
+# Or step by step:
+make gen        # regenerate assets/chr/tiles.chr (requires Python 3)
 make            # build build/alconario.nes
 make run        # build and launch in an emulator (FCEUX by default)
-make clean
+make clean      # remove build artifacts
 ```
 
 Override the emulator:
