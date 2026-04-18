@@ -1,12 +1,12 @@
-# Alconario 🎮
+# Alconario 🍄
 
 > *"Every hero needs a friend."*
 
 **Alconario** is a funny real 8-bit NES game starring **Alconario** — the best
-friend of Marion, a cheerful guy from a small Belarusian village deep in the
+friend of Mario, a cheerful guy from a small Belarusian village deep in the
 countryside.
 
-While Marion is away on one of his legendary adventures, Alconario has to look
+While Mario is away on one of his legendary adventures, Alconario has to look
 after the village, help the neighbours, dodge trouble, and maybe find a few
 surprises along the way.  Pure 8-bit charm, pixel art sunflower fields, and
 good old D-pad action — just the way it was meant to be. 🌻
