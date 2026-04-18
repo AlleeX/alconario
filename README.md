@@ -52,7 +52,7 @@ alconario/
 │   ├── player.c         # Player logic
 │   └── gfx.c            # Rendering helpers
 ├── src/asm/             # Hand-written 6502 assembly
-│   └── crt0.s           # Startup (provided by neslib normally)
+│   └── chr.s            # CHR-ROM bank embedding
 ├── tools/               # Helper scripts (asset conversion, packing)
 │   └── README.md
 ├── build/               # Build outputs (gitignored)
@@ -81,7 +81,38 @@ git clone https://github.com/clbr/neslib.git lib/neslib
 
 (Or download from https://shiru.untergrund.net/code.shtml)
 
-## 🚀 Build & run
+## � VS Code IntelliSense (optional)
+
+To get header navigation and basic IntelliSense, create
+`.vscode/c_cpp_properties.json`:
+
+```jsonc
+{
+  "configurations": [
+    {
+      "name": "Mac-cc65",
+      "includePath": [
+        "${workspaceFolder}/include",
+        "${workspaceFolder}/lib/neslib",
+        // adjust to your Homebrew prefix:
+        //   Apple Silicon: /opt/homebrew/share/cc65/include
+        //   Intel Mac:     /usr/local/share/cc65/include
+        "/usr/local/share/cc65/include"
+      ],
+      "defines": ["__CC65__", "__NES__"],
+      "cStandard": "c89",
+      "intelliSenseMode": "macos-clang-arm64"
+    }
+  ],
+  "version": 4
+}
+```
+
+> **Note:** cc65 is not a clang-compatible compiler, so IntelliSense won't
+> understand all cc65-specific constructs — but "Go to Definition" and header
+> navigation will work fine.
+
+## �🚀 Build & run
 
 ```bash
 make            # build build/alconario.nes
