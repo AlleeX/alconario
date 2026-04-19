@@ -370,7 +370,7 @@ TITLE_STR = "ALCONARIO"
 
 for li, ch in enumerate(TITLE_STR):
     ox = li * 16 + 16  # center 144px of letters within bar
-    oy = 5             # 1px top margin
+    oy = 5             # 5px top margin
     bitmap = LETTER_BITMAPS[ch]
 
     # Pass 1 — dark shadow (offset +1,+1) using background colour

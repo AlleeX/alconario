@@ -109,14 +109,26 @@ EMU ?= fceux
 # BUILD TARGETS
 # =============================================================================
 
-.PHONY: all run clean dirs help gen
+.PHONY: all run clean dirs help gen chr validate
 
 # Default target — build the ROM.
 all: dirs $(OUTPUT)
 
-# Generate CHR tile data from the Python script.
+# Generate CHR tile data from the Python script (legacy procedural method).
 gen:
 	python3 tools/gen_chr.py
+
+# Convert Procreate PNGs to CHR-ROM binary (preferred art pipeline).
+chr:
+	@echo "  CHR  Validating tiles..."
+	@python3 tools/validate_tiles.py $(ASSET_DIR)/chr/bg_tiles.png $(ASSET_DIR)/chr/spr_tiles.png 2>/dev/null || true
+	@echo "  CHR  Converting PNGs → tiles.chr"
+	@python3 tools/png2chr.py $(ASSET_DIR)/chr/bg_tiles.png $(ASSET_DIR)/chr/spr_tiles.png -o $(ASSET_DIR)/chr/tiles.chr
+	@echo "  CHR  Done"
+
+# Validate tile PNGs without converting.
+validate:
+	python3 tools/validate_tiles.py $(ASSET_DIR)/chr/bg_tiles.png $(ASSET_DIR)/chr/spr_tiles.png
 
 # Create the output directories before anything else.
 dirs:
@@ -159,6 +171,8 @@ clean:
 help:
 	@echo "Targets:"
 	@echo "  make           Build $(OUTPUT)"
-	@echo "  make gen       Regenerate CHR tile data (requires Python 3)"
+	@echo "  make chr       Convert Procreate PNGs → tiles.chr (preferred)"
+	@echo "  make gen       Regenerate CHR tile data procedurally (legacy)"
+	@echo "  make validate  Validate tile PNGs (dimensions, colors)"
 	@echo "  make run       Build and run in \$$EMU (default: $(EMU))"
 	@echo "  make clean     Remove build artifacts"
