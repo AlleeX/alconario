@@ -71,12 +71,7 @@ static void enter_title(void)
     ppu_on_all();
     g_state = STATE_TITLE;
 
-    /*
-     * TODO: Enable title music once real FamiTone2 data is exported.
-     * Export assets/music/title.fms from FamiStudio → FamiTone2 Music
-     * (CA65 format) → save as lib/neslib/music.sinc, then uncomment
-     * the .include in crt0.s and the music_play() call below.
-     */
+    /* Play title screen music (song 0 = "Belarus NES Theme"). */
     music_play(0);
 }
 

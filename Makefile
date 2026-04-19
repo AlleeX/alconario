@@ -65,7 +65,7 @@ CFLAGS  := -t $(TARGET) -Oirs -Cl \
 # ---- Assembler flags  (ca65) ------------------------------------------------
 # -t $(TARGET)    : same NES target
 # -I $(NESLIB_DIR): find neslib's .inc include files (macros, zero-page defs)
-ASFLAGS := -t $(TARGET) -I $(NESLIB_DIR)
+ASFLAGS := -t $(TARGET) -I $(NESLIB_DIR) -I $(ASM_DIR)
 
 # ---- Linker flags  (ld65) ---------------------------------------------------
 # -C cfg/nes.cfg  : memory map — tells ld65 where PRG, CHR, ZP, RAM live

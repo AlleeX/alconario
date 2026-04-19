@@ -11,7 +11,3 @@ build/
 .vscode/
 .idea/
 *.swp
-
-# Vendored libs (uncomment if you DO want them ignored)
-lib/neslib/
-lib/famitone2/
