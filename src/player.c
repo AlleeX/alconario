@@ -37,32 +37,19 @@
 #include "game.h"     /* STATE_GAMEOVER, g_state */
 #include "input.h"    /* pad1, BTN_* */
 #include "player.h"   /* player_t, extern player */
+#include "sfx.h"      /* SFX_JUMP, SFX_CH1 */
 
 /* ---- Tuneable constants ------------------------------------------- */
 
-/*
- * PLAYER_SPEED — pixels moved per frame when a direction is held.
- * At 60 fps, speed=1 → 60 px/s ≈ crosses the screen in ~4 seconds.
- * Increase to 2 for a snappier feel.
- */
-#define PLAYER_SPEED   1
+#define PLAYER_SPEED    2       /* horizontal walk speed (px/frame)    */
+#define PLAYER_RUN_SPEED 3     /* horizontal run speed (hold B)       */
+#define PLAYER_TILE     0x01   /* first non-empty tile in CHR bank 0 */
+#define PLAYER_ATTR     0x00
 
-/*
- * PLAYER_TILE — index of the player's sprite tile in the CHR pattern table.
- * Tile $00 is the very first 8×8 tile in the sprite bank (CHR bank 1).
- * Change this once you have real artwork in your .chr file.
- */
-#define PLAYER_TILE    0x00
-
-/*
- * PLAYER_ATTR — sprite attribute byte:
- *   bits 0-1 : palette (0 = sprite palette 0, defined in gfx.c)
- *   bit  5   : priority (0 = in front of background)
- *   bit  6   : horizontal flip
- *   bit  7   : vertical flip
- * 0x00 = palette 0, no flip, in front of BG.
- */
-#define PLAYER_ATTR    0x00
+#define GRAVITY         1       /* downward accel per frame            */
+#define MAX_FALL        4       /* terminal fall velocity              */
+#define JUMP_FORCE      (-10)    /* initial upward velocity on jump     */
+#define GROUND_Y        200     /* Y pixel where the ground is         */
 
 /* ---- Global player instance (one per game) ----------------------- */
 player_t player;
@@ -74,12 +61,14 @@ player_t player;
  * ------------------------------------------------------------------ */
 void player_init(void)
 {
-    player.x     = 120;   /* start near horizontal centre (screen = 256px) */
-    player.y     = 112;   /* start near vertical centre   (screen = 240px) */
-    player.vx    = 0;     /* no initial horizontal velocity */
-    player.vy    = 0;     /* no initial vertical velocity   */
-    player.frame = 0;     /* first animation frame          */
-    player.alive = 1;     /* player is alive                */
+    player.x      = 40;    /* start near left side                    */
+    player.y      = GROUND_Y - 8; /* stand on ground (8px sprite)     */
+    player.vx     = 0;
+    player.vy     = 0;
+    player.frame  = 0;
+    player.alive  = 1;
+    player.on_ground = 1;
+    player.facing = 0;     /* facing right */
 }
 
 /* ------------------------------------------------------------------
@@ -89,34 +78,49 @@ void player_init(void)
  * ------------------------------------------------------------------ */
 void player_update(void)
 {
-    /* Don't move if dead (e.g. death animation is playing). */
+    unsigned char speed;
+
     if (!player.alive) return;
 
-    /*
-     * D-pad movement — pad1 is the HELD bitmask (see input.c).
-     * We use += / -= directly on uint8_t; wrapping is safe here
-     * because we clamp immediately below.
-     */
-    if (pad1 & BTN_LEFT)  player.x -= PLAYER_SPEED;
-    if (pad1 & BTN_RIGHT) player.x += PLAYER_SPEED;
-    if (pad1 & BTN_UP)    player.y -= PLAYER_SPEED;
-    if (pad1 & BTN_DOWN)  player.y += PLAYER_SPEED;
+    /* -- Horizontal movement ---------------------------------------- */
+    speed = (pad1 & BTN_B) ? PLAYER_RUN_SPEED : PLAYER_SPEED;
 
-    /*
-     * Screen boundary clamp.
-     * Left/Right: keep the sprite fully on-screen (8px margin = sprite width).
-     * Top/Bottom: 8px top margin; 216 = 240 - 24 (sprite + a little padding).
-     *
-     * NOTE: x and y are uint8_t (0-255), so we check against 8 before
-     * subtracting to avoid underflow wrap-around.
-     */
-    if (player.x < 8)   player.x = 8;
-    if (player.x > 240) player.x = 240;
-    if (player.y < 8)   player.y = 8;
-    if (player.y > 216) player.y = 216;
+    if (pad1 & BTN_LEFT) {
+        player.x -= speed;
+        player.facing = 1;
+    }
+    if (pad1 & BTN_RIGHT) {
+        player.x += speed;
+        player.facing = 0;
+    }
 
-    /* TODO: animate player.frame based on movement direction */
-    /* TODO: check collisions with enemies / tiles            */
+    /* -- Jumping (press A while on ground) -------------------------- */
+    if ((pad1_new & BTN_A) && player.on_ground) {
+        player.vy = JUMP_FORCE;
+        player.on_ground = 0;
+        sfx_play(SFX_JUMP, SFX_CH1);
+    }
+
+    /* -- Gravity ---------------------------------------------------- */
+    if (!player.on_ground) {
+        player.vy += GRAVITY;
+        if (player.vy > MAX_FALL) player.vy = MAX_FALL;
+    }
+
+    /* -- Apply vertical velocity ------------------------------------ */
+    player.y += player.vy;
+
+    /* -- Ground collision ------------------------------------------- */
+    if (player.y >= GROUND_Y - 8) {
+        player.y = GROUND_Y - 8;
+        player.vy = 0;
+        player.on_ground = 1;
+    }
+
+    /* -- Screen boundary clamp (horizontal) ------------------------- */
+    if (player.x < 4)   player.x = 4;
+    if (player.x > 244) player.x = 244;
+    if (player.y < 4)   player.y = 4;
 }
 
 /* ------------------------------------------------------------------
@@ -130,7 +134,8 @@ void player_update(void)
  * ------------------------------------------------------------------ */
 void player_draw(void)
 {
-    oam_spr(player.x, player.y, PLAYER_TILE, PLAYER_ATTR, 0);
+    unsigned char attr = player.facing ? 0x40 : 0x00; /* bit 6 = H-flip */
+    oam_spr(player.x, player.y, PLAYER_TILE, attr, 0);
 
     /*
      * For a 16×16 player made of 4 tiles you would call oam_spr() four

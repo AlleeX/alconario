@@ -25,6 +25,8 @@
 @sfx_list:
   .word @sfx0
   .word @sfx1
+  .word @sfx2
+  .word @sfx3
 
 @sfx0:
   ; Frame 1: Pulse 1, duty 50%, vol 12, period ~A4 (440Hz ≈ $0FD)
@@ -59,4 +61,51 @@
   .byte $02 ; repeat 2 frames
   ; Frame 2: silence
   .byte $89,$30 ; vol=0
+  .byte $00 ; end
+
+; SFX 2: Jump — rising pitch blip on Pulse 2 (Mario-style)
+@sfx2:
+  ; Frame 1: low starting pitch, vol 10
+  .byte $83,$BA ; pulse2 vol/duty = duty 50%, vol=10
+  .byte $84,$80 ; period lo (~$180 = low note)
+  .byte $85,$01 ; period hi
+  .byte $01
+  ; Frame 2: rising pitch, vol 12
+  .byte $83,$BC ; vol=12
+  .byte $84,$20 ; period lo (~$120)
+  .byte $85,$01 ; period hi
+  .byte $01
+  ; Frame 3: higher pitch, vol 12
+  .byte $83,$BC ; vol=12
+  .byte $84,$C0 ; period lo (~$0C0)
+  .byte $85,$00 ; period hi
+  .byte $01
+  ; Frame 4: highest pitch, vol 10
+  .byte $83,$BA ; vol=10
+  .byte $84,$80 ; period lo (~$080)
+  .byte $85,$00 ; period hi
+  .byte $02 ; hold 2 frames
+  ; Frame 5: fade out
+  .byte $83,$B4 ; vol=4
+  .byte $84,$60 ; period lo
+  .byte $85,$00
+  .byte $02
+  ; Silence
+  .byte $83,$B0 ; vol=0
+  .byte $00 ; end
+
+; SFX 3: Pause — two-tone boop on Pulse 1
+@sfx3:
+  ; Frame 1: high note, vol 10
+  .byte $80,$BA ; duty 50%, vol=10
+  .byte $81,$A0 ; period lo (~$0A0)
+  .byte $82,$00 ; period hi
+  .byte $03 ; hold 3 frames
+  ; Frame 2: lower note, vol 8
+  .byte $80,$B8 ; vol=8
+  .byte $81,$40 ; period lo (~$140)
+  .byte $82,$01 ; period hi
+  .byte $03 ; hold 3 frames
+  ; Silence
+  .byte $80,$B0 ; vol=0
   .byte $00 ; end

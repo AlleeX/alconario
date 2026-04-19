@@ -9,6 +9,8 @@
 
 #define SFX_MENU_SELECT  0
 #define SFX_MENU_CURSOR  1
+#define SFX_JUMP         2
+#define SFX_PAUSE        3
 
 /* FamiTone2 SFX channel slots (0-3). */
 #define SFX_CH0  0

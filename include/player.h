@@ -30,6 +30,9 @@
  *   alive   — 1 = player is active, 0 = player is dead.
  *              When 0, player_update() skips all movement / input.
  *              Set to 0 when hit by an enemy; trigger STATE_GAMEOVER.
+ *
+ *   on_ground  — 1 = standing on solid ground
+ *   facing     — 0 = right, 1 = left
  */
 typedef struct {
     uint8_t x;
@@ -38,6 +41,8 @@ typedef struct {
     int8_t  vy;
     uint8_t frame;
     uint8_t alive;
+    uint8_t on_ground;
+    uint8_t facing;
 } player_t;
 
 /* The one and only player instance — defined in player.c. */

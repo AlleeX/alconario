@@ -24,7 +24,7 @@ void game_init(void)
 {
     pal_bright(4);
     bank_bg(0);
-    bank_spr(1);
+    bank_spr(0);
     screen_title_enter();
 }
 
