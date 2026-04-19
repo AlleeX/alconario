@@ -1,0 +1,62 @@
+; sounds.sinc — FamiTone2 SFX data (hand-crafted)
+;
+; FamiToneSfxInit expects:
+;   word 0: pointer to NTSC effects list
+;   word 1: pointer to PAL effects list  (same list if no pitch fix needed)
+; Each effects list is an array of .word pointers, one per SFX.
+;
+; Stream data bytes:
+;   $80+reg, value  = write to APU register (relative to channel)
+;     $80-$82 = pulse1 (vol, period_lo, period_hi)
+;     $83-$85 = pulse2
+;     $86-$88 = triangle
+;     $89-$8B = noise
+;   $01-$7F          = repeat previous frame N times
+;   $00              = end of effect
+;
+; SFX 0: Menu select — short descending blip on Pulse 1
+; SFX 1: Menu cursor — tiny tick on Noise channel
+
+; --- Header: pointers to the effects list (NTSC, PAL) ---
+  .word @sfx_list   ; NTSC
+  .word @sfx_list   ; PAL (same — no pitch difference for SFX)
+
+; --- Effects pointer list ---
+@sfx_list:
+  .word @sfx0
+  .word @sfx1
+
+@sfx0:
+  ; Frame 1: Pulse 1, duty 50%, vol 12, period ~A4 (440Hz ≈ $0FD)
+  .byte $80,$BC ; vol/duty = %10 11 1100 = duty 50%, constant vol, vol=12
+  .byte $81,$FD ; period lo
+  .byte $82,$00 ; period hi
+  .byte $01 ; repeat 1 frame
+  ; Frame 2: slightly lower pitch, vol 10
+  .byte $80,$BA ; vol=10
+  .byte $81,$2C ; period lo (lower pitch ~$12C)
+  .byte $82,$01 ; period hi
+  .byte $01 ; repeat 1 frame
+  ; Frame 3: even lower, vol 7
+  .byte $80,$B7 ; vol=7
+  .byte $81,$7E ; period lo (~$17E)
+  .byte $82,$01 ; period hi
+  .byte $01 ; repeat 1 frame
+  ; Frame 4: fade out, vol 3
+  .byte $80,$B3 ; vol=3
+  .byte $81,$D0 ; period lo (~$1D0)
+  .byte $82,$01 ; period hi
+  .byte $01 ; repeat 1 frame
+  ; Frame 5: silence
+  .byte $80,$B0 ; vol=0
+  .byte $00 ; end
+
+@sfx1:
+  ; Frame 1: Noise channel tick, vol 8
+  .byte $89,$38 ; noise vol = %00 11 1000 = constant vol, vol=8
+  .byte $8A,$02 ; noise period (short noise, mid-high)
+  .byte $8B,$00 ; noise length
+  .byte $02 ; repeat 2 frames
+  ; Frame 2: silence
+  .byte $89,$30 ; vol=0
+  .byte $00 ; end

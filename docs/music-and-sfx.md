@@ -25,49 +25,40 @@ Audio design plan for Alconario — a Super Mario Bros–style NES platformer.
 
 ## Toolchain
 
+We use **FamiStudio** for composition and its built-in FamiTone2 exporter for conversion.
+
 ```
-FamiTracker (.ftm)
+FamiStudio (.fms)
        │
-       ▼
-FamiTracker Text Export (.txt)
+       ▼  File → Export → FamiTone2 Music (CA65)
+assets/music/*.s (raw export)
        │
-       ▼
-text2data (famitone2)
+       ▼  Strip .export/.global lines
+src/asm/music.sinc (clean include)
        │
-       ▼
-ca65-compatible .s file
-       │
-       ▼
+       ▼  .include in crt0.s (via -I src/asm)
 Linked into ROM via ld65
 ```
 
-### Commands
-
-```bash
-# Music
-text2data assets/music/overworld.txt -ca65 -o src/asm/music_overworld.s
-
-# SFX (single file with all effects)
-nsf2data assets/music/sfx.nsf -ca65 -o src/asm/sfx_data.s
-```
+> See [Music Export Guide](music-export-guide.md) for step-by-step instructions.
 
 ---
 
 ## Music Tracks Plan
 
-| Track | Game State | Tempo | Feel | Channels |
+| Track | Game State | Tempo | Feel | Status |
 | --- | --- | --- | --- | --- |
-| `title` | Title screen | ~120 BPM | Bouncy, inviting | All 5 |
-| `overworld` | Main levels (outdoor) | ~140 BPM | Energetic, adventurous | All 5 |
-| `underground` | Underground / pipe areas | ~100 BPM | Mysterious, echoey | P1, P2, Tri, Noise |
-| `water` | Water levels | ~90 BPM | Flowing, waltz-like (3/4) | P1, P2, Tri |
-| `castle` | Castle / boss approach | ~130 BPM | Tense, dark | All 5 |
-| `boss` | Boss fight | ~160 BPM | Intense, driving | All 5 |
-| `star` | Invincibility | ~180 BPM | Fast, triumphant | P1, P2, Tri |
-| `hurry` | Timer low (<100) | Faster variant of current | Speed up current track | — |
-| `gameover` | Game over | ~80 BPM | Short, melancholic | P1, Tri |
-| `victory` | Level clear | — | Fanfare, 3–4 seconds | All 5 |
-| `world_clear` | World clear / castle | — | Longer fanfare | All 5 |
+| `title` (Kasiu Yas) | Title screen | 112 BPM | Bouncy, inviting | ✅ Done |
+| `overworld` | Main levels (outdoor) | ~140 BPM | Energetic, adventurous | ⬜ TODO |
+| `underground` | Underground / pipe areas | ~100 BPM | Mysterious, echoey | ⬜ TODO |
+| `water` | Water levels | ~90 BPM | Flowing, waltz-like (3/4) | ⬜ TODO |
+| `castle` | Castle / boss approach | ~130 BPM | Tense, dark | ⬜ TODO |
+| `boss` | Boss fight | ~160 BPM | Intense, driving | ⬜ TODO |
+| `star` | Invincibility | ~180 BPM | Fast, triumphant | ⬜ TODO |
+| `hurry` | Timer low (<100) | Faster variant of current | Speed up current track | ⬜ TODO |
+| `gameover` | Game over | ~80 BPM | Short, melancholic | ⬜ TODO |
+| `victory` | Level clear | — | Fanfare, 3–4 seconds | ⬜ TODO |
+| `world_clear` | World clear / castle | — | Longer fanfare | ⬜ TODO |
 
 ### Music design guidelines
 
@@ -103,24 +94,26 @@ When multiple SFX fire simultaneously, higher priority wins. `sfx_death` is spec
 
 ---
 
-## Runtime API (famitone2 + neslib)
+## Runtime API (neslib)
+
+These functions are declared in `neslib.h` and backed by FamiTone2:
 
 ```c
-// Initialize music engine (call once at startup)
-famitone2_init(music_data);
-sfx_init(sfx_data);
+/* Music — initialized automatically by crt0.s at boot */
+void __fastcall__ music_play(unsigned char song);   /* play by index */
+void __fastcall__ music_stop(void);                 /* stop */
+void __fastcall__ music_pause(unsigned char pause);  /* 1=pause, 0=resume */
 
-// Play music track
-famitone2_music_play(MUSIC_OVERWORLD);
+/* SFX — requires sounds.sinc to be included in crt0.s */
+void __fastcall__ sfx_play(unsigned char sfx, unsigned char channel);
+/* channel: 0=Pulse1, 1=Pulse2, 2=Triangle, 3=Noise */
+```
 
-// Stop music
-famitone2_music_stop();
+### Current usage in game.c
 
-// Play SFX (channel: 0=Pulse1, 1=Pulse2, 2=Triangle, 3=Noise)
-famitone2_sfx_play(SFX_JUMP, SFX_CH1);  // Play jump on Pulse 2
-
-// Call every frame in NMI/update
-famitone2_update();
+```c
+music_play(0);   /* enter_title() — play "Kasiu Yas Title" */
+music_stop();    /* enter_play()  — silence when gameplay starts */
 ```
 
 ---
@@ -129,32 +122,29 @@ famitone2_update();
 
 ```
 assets/music/
-├── overworld.ftm          # FamiTracker project files
-├── underground.ftm
-├── castle.ftm
-├── boss.ftm
-├── title.ftm
-├── gameover.ftm
-├── victory.ftm
-├── star.ftm
-├── sfx.ftm                # All SFX in one file (separate instruments)
-└── README.md              # Notes on tempo, key, design choices
-```
+├── title.fms              # FamiStudio project (original title theme)
+├── title2.s               # FamiTone2 export — active title music
+├── fami-title.txt         # FamiStudio text format (human-readable)
+├── nes_theme.txt          # Earlier theme (reference)
+├── overworld.fms          # TODO
+├── underground.fms        # TODO
+├── castle.fms             # TODO
+├── boss.fms               # TODO
+├── gameover.fms           # TODO
+├── sfx.fms                # TODO: all SFX in one project
+└── README.md              # Composition notes
 
-Generated files (in `src/asm/`):
-
-```
 src/asm/
-├── music_overworld.s
-├── music_underground.s
-├── music_castle.s
-├── ...
-└── sfx_data.s
+├── music.sinc             # Active music data (included in ROM by crt0.s)
+├── sounds.sinc            # TODO: SFX data (included in ROM by crt0.s)
+├── chr.s                  # CHR-ROM tile embedding
+└── nes_header.s           # iNES header
 ```
 
 ---
 
 ## Related Docs
 
+- [Music Export Guide](music-export-guide.md) — step-by-step export & integration workflow
 - [Asset Pipeline](asset-pipeline.md) — full build flow
 - [NES Glossary](nes-glossary.md) — APU channel definitions

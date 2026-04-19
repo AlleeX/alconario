@@ -11,7 +11,7 @@ How raw art, music, and level data flow from creation tools into the final `.nes
  ─────────────────                    ────────────
  .png / .bmp (indexed)  ──► gen_chr.py ──► tiles.chr ──► chr.s ──► chr.o ─┐
  .pal (hex list)        ──► palette_gen ──► palette.h ──────────────────── │
- .ftm (FamiTracker)     ──► text2data  ──► music.s   ──► music.o ──────── ├──► ld65 ──► alconario.nes
+ .fms (FamiStudio)      ──► FamiTone2 export ──► music.sinc ─────────── ├──► ld65 ──► alconario.nes
  .json / .csv (levels)  ──► lvl_pack   ──► levels.s  ──► levels.o ─────── │
  C sources (.c)         ──► cc65 ──► ca65 ──► .o ──────────────────────── ┘
 ```
@@ -95,13 +95,16 @@ At runtime, palettes are written to PPU `$3F00`–`$3F1F` during VBlank via nesl
 ## 3. Music & SFX
 
 ### Toolchain
-1. Compose in **FamiTracker** (`.ftm` files stored in `assets/music/`).
-2. Export as **FamiTracker text** (`.txt`).
-3. Convert with **text2data** (famitone2 tool):
+1. Compose in **FamiStudio** (`.fms` projects stored in `assets/music/`).
+2. Export via **File → Export → FamiTone2 Music** (CA65 format).
+3. Save `.s` file to `assets/music/` (e.g. `title2.s`).
+4. Strip `.export`/`.global` lines and save as `src/asm/music.sinc`:
    ```bash
-   text2data assets/music/overworld.txt -ca65 -o src/asm/music_overworld.s
+   sed -E '/^\.(export|global)/d; /^music_data_/d' assets/music/title2.s > src/asm/music.sinc
    ```
-4. Include the `.s` file; famitone2 runtime plays it.
+5. `crt0.s` includes it automatically via `-I src/asm`.
+
+> See [Music Export Guide](music-export-guide.md) for full details.
 
 ### Channel budget
 | Channel | Typical use |
@@ -113,9 +116,10 @@ At runtime, palettes are written to PPU `$3F00`–`$3F1F` during VBlank via nesl
 | DPCM | Sampled kicks, speech (uses PRG-ROM space!) |
 
 ### SFX
-- Composed as short FamiTracker instruments or single-channel patterns.
-- Exported with `nsf2data` or `text2data --sfx`.
-- Played via `famitone2_sfx_play()`.
+- Created as instruments/patterns in FamiStudio (same or separate `.fms` project).
+- Exported via **File → Export → FamiTone2 SFX** (CA65 format).
+- Stripped and saved as `src/asm/sounds.sinc`.
+- Played via `sfx_play(SFX_ID, channel)` from C.
 
 ### Strategy
 - **One music track per game state**: title, overworld, underground, boss, game-over, victory.
@@ -228,12 +232,16 @@ assets/
 │   ├── castle.pal          # BG palette set for castle
 │   └── sprites.pal         # Sprite palettes (shared across levels)
 ├── music/
-│   ├── overworld.ftm       # FamiTracker source
-│   ├── underground.ftm
-│   ├── boss.ftm
-│   ├── title.ftm
-│   ├── gameover.ftm
-│   └── sfx.ftm             # Sound effects
+│   ├── title.fms           # FamiStudio project (original title theme)
+│   ├── title2.s            # FamiTone2 export — active title music
+│   ├── fami-title.txt      # FamiStudio text format (reference)
+│   ├── nes_theme.txt       # Earlier theme (reference)
+│   ├── overworld.fms       # TODO
+│   ├── underground.fms     # TODO
+│   ├── castle.fms          # TODO
+│   ├── boss.fms            # TODO
+│   ├── gameover.fms        # TODO
+│   └── sfx.fms             # TODO: all SFX in one project
 └── levels/
     ├── metatiles.json       # Metatile definitions (shared)
     ├── world_1_1.json       # Level data

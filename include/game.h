@@ -22,6 +22,7 @@
  *
  * STATE_BOOT     : very first frame after power-on (reserved for future use)
  * STATE_TITLE    : title / attract screen — waiting for START
+ * STATE_STAGE    : "STAGE X" title card — auto-advances or press START
  * STATE_PLAY     : active gameplay
  * STATE_PAUSE    : gameplay frozen — waiting for START to resume
  * STATE_GAMEOVER : player has died — show score, wait for START
@@ -32,6 +33,7 @@
 typedef enum {
     STATE_BOOT = 0,
     STATE_TITLE,
+    STATE_STAGE,
     STATE_PLAY,
     STATE_PAUSE,
     STATE_GAMEOVER

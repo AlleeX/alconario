@@ -21,7 +21,7 @@
  *
  * STATE DIAGRAM
  * -------------
- *   BOOT ──► TITLE ──[START]──► PLAY ──[START]──► PAUSE
+ *   BOOT ──► TITLE ──[START]──► STAGE ──[START/timeout]──► PLAY ──[START]──► PAUSE
  *              ▲                  │                  │
  *              │                  │[die]         [START]
  *              └──────────────────┘                  │
@@ -38,6 +38,16 @@
 
 /* The current active state — readable from any module via game.h */
 game_state_t g_state;
+
+/* SFX indices (must match order in sounds.sinc pointer table) */
+#define SFX_MENU_SELECT  0
+#define SFX_MENU_CURSOR  1
+
+/* Current stage number (1-based) */
+static unsigned char g_current_stage;
+
+/* Frame counter used on the stage title screen (auto-advance after timeout) */
+static unsigned char g_stage_timer;
 
 /* ------------------------------------------------------------------
  * enter_title()
@@ -76,15 +86,48 @@ static void enter_title(void)
 }
 
 /* ------------------------------------------------------------------
+ * enter_stage()
+ * Show a "STAGE X" title card before gameplay starts.
+ * The player can press START to skip, or it auto-advances.
+ * ------------------------------------------------------------------ */
+static void enter_stage(void)
+{
+    music_stop();
+    ppu_off();
+    gfx_clear_nametable();
+    gfx_load_palettes();
+
+    /* Center "STAGE X" on screen (row 13, roughly centered) */
+    {
+        /* Build "STAGE X" string — stage number is 1-digit for now */
+        static const char stage_prefix[] = "STAGE ";
+        char stage_str[9];
+        unsigned char i;
+        for (i = 0; i < 6; ++i) stage_str[i] = stage_prefix[i];
+        stage_str[6] = '0' + g_current_stage;
+        stage_str[7] = '\0';
+        gfx_draw_text(13, 13, stage_str);
+    }
+
+    ppu_on_all();
+    g_stage_timer = 0;
+    g_state = STATE_STAGE;
+}
+
+/* ------------------------------------------------------------------
  * enter_play()
- * Transition into active gameplay.
+ * Transition into active gameplay (mock level screen for now).
  * ------------------------------------------------------------------ */
 static void enter_play(void)
 {
-    music_stop();           /* stop title music                        */
     ppu_off();
-    gfx_clear_nametable();  /* clear old title-screen tiles            */
-    gfx_load_palettes();    /* reload palettes (may differ per level)  */
+    gfx_clear_nametable();
+    gfx_load_palettes();
+
+    /* Mock level screen — draw a simple ground and HUD placeholder */
+    gfx_draw_text(2, 2, "WORLD 1-1");
+    gfx_draw_text(2, 4, "ALCONARIO x 3");
+
     player_init();          /* place the player at the starting position */
     ppu_on_all();
     g_state = STATE_PLAY;
@@ -138,8 +181,20 @@ void game_tick(void)
 
     /* ---- Title screen ---- */
     case STATE_TITLE:
-        /* Wait for the player to press START, then begin the game. */
+        /* Wait for the player to press START, then show stage title. */
         if (pad1_new & BTN_START) {
+            sfx_play(SFX_MENU_SELECT, 0);
+            g_current_stage = 1;
+            enter_stage();
+        }
+        break;
+
+    /* ---- Stage title card ---- */
+    case STATE_STAGE:
+        ++g_stage_timer;
+        /* Press START to skip, or auto-advance after ~3 seconds (180 frames) */
+        if ((pad1_new & BTN_START) || g_stage_timer >= 180) {
+            sfx_play(SFX_MENU_SELECT, 0);
             enter_play();
         }
         break;

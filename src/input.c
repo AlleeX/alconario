@@ -50,15 +50,10 @@ uint8_t pad1_new;
 void input_poll(void)
 {
     /*
-     * pad_poll(0) latches and reads controller #1 (zero-indexed).
-     * Returns 0 if no buttons are pressed.
-     */
-    pad1     = pad_poll(0);
-
-    /*
-     * pad_trigger(0) must be called AFTER pad_poll() for the same
-     * controller — it uses the internal previous-frame state that
-     * pad_poll() just updated.
+     * IMPORTANT: neslib requires pad_trigger() to be called FIRST.
+     * Then use pad_state() to get the held-buttons mask.
+     * Calling pad_poll() before pad_trigger() corrupts the edge-detect.
      */
     pad1_new = pad_trigger(0);
+    pad1     = pad_state(0);
 }
