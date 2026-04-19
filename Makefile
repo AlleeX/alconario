@@ -39,6 +39,7 @@ LD        := ld65
 
 # ---- Directory layout -------------------------------------------------------
 SRC_DIR   := src
+SCR_DIR   := src/screens
 ASM_DIR   := src/asm
 INC_DIR   := include
 LIB_DIR   := lib
@@ -81,6 +82,7 @@ LIBS    := nes.lib
 # ---- Source file discovery --------------------------------------------------
 # $(wildcard pattern) expands to all matching files.
 C_SRCS   := $(wildcard $(SRC_DIR)/*.c)       # all .c files in src/
+SCR_SRCS := $(wildcard $(SCR_DIR)/*.c)       # all .c files in src/screens/
 ASM_SRCS := $(wildcard $(ASM_DIR)/*.s)       # all .s files in src/asm/
 
 # If neslib ships its own crt0.s (startup + NMI handler + iNES header),
@@ -92,12 +94,13 @@ endif
 # ---- Object file names  (derived from source lists) ------------------------
 # patsubst replaces path prefix and extension: src/foo.c → build/obj/foo.o
 C_OBJS   := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(C_SRCS))
+SCR_OBJS := $(patsubst $(SCR_DIR)/%.c,$(OBJ_DIR)/%.o,$(SCR_SRCS))
 
 # For .s files we strip the directory (notdir) then replace .s with .o.
 # This works for both src/asm/*.s AND lib/neslib/crt0.s.
 ASM_OBJS := $(patsubst %.s,$(OBJ_DIR)/%.o,$(notdir $(ASM_SRCS)))
 
-OBJS     := $(C_OBJS) $(ASM_OBJS)    # combined list passed to the linker
+OBJS     := $(C_OBJS) $(SCR_OBJS) $(ASM_OBJS)    # combined list passed to the linker
 
 OUTPUT   := $(BUILD_DIR)/$(PROJECT).nes   # final ROM file
 
@@ -137,6 +140,12 @@ dirs:
 # ---- C source → object file  (two steps: cc65 → ca65) ----------------------
 # $< = the .c prerequisite    $* = the stem (filename without extension)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@echo "  CC  $<"
+	@$(CC) $(CFLAGS) -o $(OBJ_DIR)/$*.s $<
+	@$(AS) $(ASFLAGS) -o $@ $(OBJ_DIR)/$*.s
+
+# ---- Screen modules (src/screens/*.c) → object file ------------------------
+$(OBJ_DIR)/%.o: $(SCR_DIR)/%.c
 	@echo "  CC  $<"
 	@$(CC) $(CFLAGS) -o $(OBJ_DIR)/$*.s $<
 	@$(AS) $(ASFLAGS) -o $@ $(OBJ_DIR)/$*.s
