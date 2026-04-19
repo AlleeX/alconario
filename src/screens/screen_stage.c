@@ -37,14 +37,26 @@ void screen_stage_enter(unsigned char stage_num)
     gfx_clear_nametable();
     gfx_load_palettes();
 
-    /* Build "STAGE X" string */
+    /* Build "STAGE XX" string */
     for (i = 0; i < 6; ++i) buf[i] = prefix[i];
-    buf[6] = '0' + current_stage;
-    buf[7] = '\0';
+    if (current_stage >= 10) {
+        buf[6] = '0' + (current_stage / 10);
+        buf[7] = '0' + (current_stage % 10);
+        buf[8] = '\0';
+    } else {
+        buf[6] = '0' + current_stage;
+        buf[7] = '\0';
+    }
     gfx_draw_text(13, 13, buf);
 
     ppu_on_all();
     stage_timer = 0;
+
+    /* Play win jingle when advancing past stage 1 */
+    if (current_stage > 1) {
+        sfx_play(SFX_WIN, SFX_CH0);
+    }
+
     g_state = STATE_STAGE;
 }
 
@@ -57,6 +69,10 @@ void screen_stage_tick(void)
 
     if ((pad1_new & BTN_START) || stage_timer >= STAGE_TIMEOUT) {
         sfx_play(SFX_MENU_SELECT, SFX_CH0);
-        screen_play_enter();
+        if (current_stage > 1) {
+            screen_play_resume();  /* keep score/lives */
+        } else {
+            screen_play_enter();   /* fresh game */
+        }
     }
 }

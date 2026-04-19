@@ -46,6 +46,18 @@ typedef enum {
  */
 extern game_state_t g_state;
 
+/* Player lives — displayed on HUD, decremented on hit. */
+extern unsigned char g_lives;
+
+/* Score counter */
+extern unsigned int g_score;
+
+/* Current stage number (1-based) */
+extern unsigned char g_stage;
+
+/* Score needed to advance to next stage (stage * 10) */
+extern unsigned int g_next_stage_score;
+
 /*
  * game_init() -- one-time setup: palettes, CHR banks, initial state.
  * Called once from main() before the game loop starts.

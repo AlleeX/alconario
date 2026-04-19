@@ -27,6 +27,11 @@
   .word @sfx1
   .word @sfx2
   .word @sfx3
+  .word @sfx4
+  .word @sfx5
+  .word @sfx6
+  .word @sfx7
+  .word @sfx8
 
 @sfx0:
   ; Frame 1: Pulse 1, duty 50%, vol 12, period ~A4 (440Hz ≈ $0FD)
@@ -108,4 +113,97 @@
   .byte $03 ; hold 3 frames
   ; Silence
   .byte $80,$B0 ; vol=0
+  .byte $00 ; end
+
+; SFX 4: Hit — harsh noise burst
+@sfx4:
+  .byte $89,$3F ; noise vol=15
+  .byte $8A,$06 ; noise period
+  .byte $8B,$00
+  .byte $03 ; 3 frames
+  .byte $89,$3A ; vol=10
+  .byte $8A,$08
+  .byte $03
+  .byte $89,$35 ; vol=5
+  .byte $8A,$0A
+  .byte $03
+  .byte $89,$30 ; silence
+  .byte $00 ; end
+
+; SFX 5: Game Over — descending sad tones on Pulse 1
+@sfx5:
+  .byte $80,$BF ; duty 50%, vol=15
+  .byte $81,$00 ; period lo (~$100)
+  .byte $82,$01
+  .byte $08 ; hold 8 frames
+  .byte $80,$BD ; vol=13
+  .byte $81,$50 ; period lo (~$150)
+  .byte $82,$01
+  .byte $08
+  .byte $80,$BA ; vol=10
+  .byte $81,$B0 ; period lo (~$1B0)
+  .byte $82,$01
+  .byte $08
+  .byte $80,$B6 ; vol=6
+  .byte $81,$20 ; period lo (~$220)
+  .byte $82,$02
+  .byte $0C ; hold 12 frames
+  .byte $80,$B0 ; silence
+  .byte $00 ; end
+
+; SFX 6: Win / Stage Clear — ascending triumphant arpeggio on Pulse 1
+@sfx6:
+  ; Note 1: C (low)
+  .byte $80,$BF ; duty 50%, vol=15
+  .byte $81,$AB ; period lo (~$1AB)
+  .byte $82,$01
+  .byte $04
+  ; Note 2: E
+  .byte $80,$BF
+  .byte $81,$53 ; period lo (~$153)
+  .byte $82,$01
+  .byte $04
+  ; Note 3: G
+  .byte $80,$BE ; vol=14
+  .byte $81,$18 ; period lo (~$118)
+  .byte $82,$01
+  .byte $04
+  ; Note 4: C (high) — hold longer
+  .byte $80,$BD ; vol=13
+  .byte $81,$D5 ; period lo (~$0D5)
+  .byte $82,$00
+  .byte $08
+  ; Fade
+  .byte $80,$B8 ; vol=8
+  .byte $04
+  .byte $80,$B4 ; vol=4
+  .byte $04
+  ; Silence
+  .byte $80,$B0
+  .byte $00 ; end
+
+; SFX 7: Collect — quick bright chirp on Pulse 2
+@sfx7:
+  .byte $83,$BC ; duty 50%, vol=12
+  .byte $84,$A0 ; period lo (~$0A0 = high note)
+  .byte $85,$00
+  .byte $02
+  .byte $83,$BE ; vol=14
+  .byte $84,$70 ; higher
+  .byte $85,$00
+  .byte $03
+  .byte $83,$B0 ; silence
+  .byte $00 ; end
+
+; SFX 8: Miss pickup — sad low buzz on Triangle
+@sfx8:
+  .byte $86,$81 ; triangle on (bit 7 = length counter halt, non-zero = play)
+  .byte $87,$80 ; period lo (~$180 = low tone)
+  .byte $88,$01 ; period hi
+  .byte $06 ; hold 6 frames
+  .byte $86,$81
+  .byte $87,$E0 ; even lower (~$1E0)
+  .byte $88,$01
+  .byte $06
+  .byte $86,$00 ; triangle off
   .byte $00 ; end

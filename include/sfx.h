@@ -11,6 +11,11 @@
 #define SFX_MENU_CURSOR  1
 #define SFX_JUMP         2
 #define SFX_PAUSE        3
+#define SFX_HIT          4
+#define SFX_GAMEOVER     5
+#define SFX_WIN          6
+#define SFX_COLLECT      7
+#define SFX_MISS         8
 
 /* FamiTone2 SFX channel slots (0-3). */
 #define SFX_CH0  0

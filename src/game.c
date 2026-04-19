@@ -19,6 +19,10 @@
 
 /* The current active state -- readable from any module via game.h */
 game_state_t g_state;
+unsigned char g_lives;
+unsigned int g_score;
+unsigned char g_stage;
+unsigned int g_next_stage_score;
 
 void game_init(void)
 {
