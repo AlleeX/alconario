@@ -70,6 +70,14 @@ static void enter_title(void)
      */
     ppu_on_all();
     g_state = STATE_TITLE;
+
+    /*
+     * TODO: Enable title music once real FamiTone2 data is exported.
+     * Export assets/music/title.fms from FamiStudio → FamiTone2 Music
+     * (CA65 format) → save as lib/neslib/music.sinc, then uncomment
+     * the .include in crt0.s and the music_play() call below.
+     */
+    music_play(0);
 }
 
 /* ------------------------------------------------------------------
@@ -78,6 +86,7 @@ static void enter_title(void)
  * ------------------------------------------------------------------ */
 static void enter_play(void)
 {
+    music_stop();           /* stop title music                        */
     ppu_off();
     gfx_clear_nametable();  /* clear old title-screen tiles            */
     gfx_load_palettes();    /* reload palettes (may differ per level)  */

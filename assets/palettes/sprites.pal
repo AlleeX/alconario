@@ -1,0 +1,15 @@
+# sprites.pal — Sprite palettes (shared across all levels)
+# 4 sub-palettes × 4 colors = 16 NES color IDs
+# Color 0 = transparent (use $0F black as placeholder)
+
+# Sub-palette 0: Player (Alconario)
+0F 36 16 06
+
+# Sub-palette 1: Enemies (Goombas, Koopas)
+0F 27 17 07
+
+# Sub-palette 2: Items / Fire / Coins
+0F 28 16 30
+
+# Sub-palette 3: HUD / Text
+0F 30 10 00

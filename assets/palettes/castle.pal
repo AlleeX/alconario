@@ -1,0 +1,14 @@
+# castle.pal — Background palettes for castle/boss levels
+# Universal background = $0F (black)
+
+# Sub-palette 0: Dark stone walls
+0F 10 00 0D
+
+# Sub-palette 1: Lava / fire accents
+0F 26 16 06
+
+# Sub-palette 2: Chains / metal
+0F 2D 10 00
+
+# Sub-palette 3: Special / decorations
+0F 28 18 08

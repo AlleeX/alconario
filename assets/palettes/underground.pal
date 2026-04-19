@@ -1,0 +1,14 @@
+# underground.pal — Background palettes for underground/pipe levels
+# Universal background = $0F (black)
+
+# Sub-palette 0: Dark walls / ceiling
+0F 30 10 00
+
+# Sub-palette 1: Bricks / floor
+0F 27 17 07
+
+# Sub-palette 2: Pipes
+0F 2A 1A 09
+
+# Sub-palette 3: Coins / special blocks
+0F 28 18 08

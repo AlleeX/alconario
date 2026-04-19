@@ -1,0 +1,15 @@
+# overworld.pal — Background palettes for overworld levels
+# 4 sub-palettes × 4 colors = 16 NES color IDs
+# Color 0 of each sub-palette is the universal background ($21 = sky blue)
+
+# Sub-palette 0: Sky / Clouds / Text
+21 30 10 00
+
+# Sub-palette 1: Ground / Bricks
+21 27 17 07
+
+# Sub-palette 2: Pipes / Bushes / Vegetation
+21 2A 1A 09
+
+# Sub-palette 3: Coins / ? Blocks / Special
+21 28 18 08
