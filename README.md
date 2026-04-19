@@ -2,7 +2,7 @@
 
 > *"Every hero needs a friend."*
 
-![Title Screen](docs/assets/images/title.png)
+![Title Screen](docs/assets/images/alconario.png)
 
 **Alconario** is a funny real 8-bit NES game starring **Alconario** — the best
 friend of Mario, a cheerful guy from a small Belarusian village deep in the
